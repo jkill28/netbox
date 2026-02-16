@@ -24,6 +24,7 @@ The script `Sync-IntersightToNetBox.ps1` takes several parameters to connect to 
 - `NetBoxToken`: Your NetBox API token.
 - `NetBoxSite`: The name or slug of the NetBox Site where devices should be added.
 - `NetBoxRole`: The name or slug of the NetBox Device Role to assign to new devices.
+- `IntersightLocation` (Optional): Filter Intersight servers by their User Defined Location.
 - `IntersightBasePath` (Optional): Defaults to `https://intersight.com`.
 
 ### Example
@@ -35,7 +36,8 @@ The script `Sync-IntersightToNetBox.ps1` takes several parameters to connect to 
     -NetBoxUrl "https://netbox.internal" `
     -NetBoxToken "0123456789abcdef0123456789abcdef01234567" `
     -NetBoxSite "Main-DC" `
-    -NetBoxRole "Server"
+    -NetBoxRole "Server" `
+    -IntersightLocation "San Jose"
 ```
 
 ## How it Works

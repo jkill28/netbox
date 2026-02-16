@@ -50,7 +50,9 @@ param (
     [string]$NetBoxSite,
 
     [Parameter(Mandatory = $true)]
-    [string]$NetBoxRole
+    [string]$NetBoxRole,
+
+    [string]$IntersightLocation
 )
 
 # --- Initialization ---
@@ -94,13 +96,26 @@ $skip = 0
 $top = 100
 
 try {
+    # Prepare filter if location is provided
+    $filter = $null
+    if ($IntersightLocation) {
+        $filter = "UserDefinedLocation eq '$IntersightLocation'"
+        Write-Host "Filtering Intersight servers by location: $IntersightLocation" -ForegroundColor Cyan
+    }
+
     # Get total count first
-    $totalCountResult = Get-IntersightComputePhysicalSummary -Count $true
+    $countParams = @{ Count = $true }
+    if ($filter) { $countParams["Filter"] = $filter }
+
+    $totalCountResult = Get-IntersightComputePhysicalSummary @countParams
     $totalCount = $totalCountResult.Count
-    Write-Host "Found $totalCount physical servers in Intersight."
+    Write-Host "Found $totalCount physical servers in Intersight (matching filter)."
 
     while ($skip -lt $totalCount) {
-        $batch = Get-IntersightComputePhysicalSummary -Top $top -Skip $skip
+        $getParams = @{ Top = $top; Skip = $skip }
+        if ($filter) { $getParams["Filter"] = $filter }
+
+        $batch = Get-IntersightComputePhysicalSummary @getParams
         if ($null -eq $batch) { break }
 
         $results = if ($batch.PSObject.Properties['Results']) { $batch.Results } else { $batch }
