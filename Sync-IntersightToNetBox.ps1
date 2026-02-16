@@ -65,9 +65,10 @@ Import-Module Intersight.PowerShell
 
 # Configure Intersight Connection
 $intersightConfig = @{
-    ApiKeyId       = $IntersightApiKeyId
-    ApiKeyFilePath = $IntersightApiKeyFilePath
-    BasePath       = $IntersightBasePath
+    ApiKeyId          = $IntersightApiKeyId
+    ApiKeyFilePath    = $IntersightApiKeyFilePath
+    BasePath          = $IntersightBasePath
+    HttpSigningHeader = @("(request-target)", "Host", "Date", "Digest")
 }
 
 try {
@@ -100,14 +101,12 @@ try {
 
     while ($skip -lt $totalCount) {
         $batch = Get-IntersightComputePhysicalSummary -Top $top -Skip $skip
-        if ($batch.Results) {
-            $allServers.AddRange($batch.Results)
-        }
-        else {
-            # In case pagination doesn't return Results property but the array itself
-            $allServers.AddRange($batch)
-            break
-        }
+        if ($null -eq $batch) { break }
+
+        $results = if ($batch.PSObject.Properties['Results']) { $batch.Results } else { $batch }
+        if ($null -eq $results -or $results.Count -eq 0) { break }
+
+        $allServers.AddRange($results)
         $skip += $top
     }
 }
